@@ -1,4 +1,4 @@
--module(record_util_prv).
+-module(record_util_pre_clean).
 
 -export([init/1, do/1, format_error/1]).
 
@@ -10,7 +10,7 @@
 %% ===================================================================
 -spec init(rebar_state:t()) -> {ok, rebar_state:t()}.
 init(State) ->
-    io:format("1111111111111111~n"),
+    io:format("5555555555555555~n"),
     Provider = providers:create([
             {name, ?PROVIDER},            % The 'user friendly' name of the task
             {module, ?MODULE},            % The module implementation of the task
@@ -26,7 +26,7 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
-    io:format("2222222222~n"),
+    io:format("66666666666666~n"),
     {ok, State}.
 
 -spec format_error(any()) ->  iolist().
