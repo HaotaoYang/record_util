@@ -9,7 +9,6 @@
 %% ===================================================================
 -spec init(rebar_state:t()) -> {ok, rebar_state:t()}.
 init(State) ->
-    io:format("777777777777777~n"),
     Provider = providers:create([
             {namespace, record_util},
             {name, post_clean},           % The 'user friendly' name of the task
@@ -26,7 +25,7 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
-    io:format("8888888888888~n"),
+    record_util_executer:exec(post_clean, State),
     {ok, State}.
 
 -spec format_error(any()) ->  iolist().
