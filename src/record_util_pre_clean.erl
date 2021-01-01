@@ -10,7 +10,7 @@
 %% ===================================================================
 -spec init(rebar_state:t()) -> {ok, rebar_state:t()}.
 init(State) ->
-    io:format("5555555555555555~p~n", [State]),
+    io:format("5555555555555555~n"),
     Provider = providers:create([
             {namespace, record_util},
             {name, ?PROVIDER},            % The 'user friendly' name of the task
