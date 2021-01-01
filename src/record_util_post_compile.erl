@@ -2,7 +2,6 @@
 
 -export([init/1, do/1, format_error/1]).
 
--define(PROVIDER, record_util).
 -define(DEPS, [app_discovery]).
 
 %% ===================================================================
@@ -12,7 +11,8 @@
 init(State) ->
     io:format("333333333333~n"),
     Provider = providers:create([
-            {name, ?PROVIDER},            % The 'user friendly' name of the task
+            {namespace, record_util},
+            {name, post_compile},         % The 'user friendly' name of the task
             {module, ?MODULE},            % The module implementation of the task
             {bare, true},                 % The task can be run by the user, always true
             {deps, ?DEPS},                % The list of dependencies
