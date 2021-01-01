@@ -2,7 +2,7 @@
 
 -export([init/1, do/1, format_error/1]).
 
--define(PROVIDER, record_util).
+-define(PROVIDER, clean).
 -define(DEPS, [app_discovery]).
 
 %% ===================================================================
@@ -10,8 +10,9 @@
 %% ===================================================================
 -spec init(rebar_state:t()) -> {ok, rebar_state:t()}.
 init(State) ->
-    io:format("5555555555555555~n"),
+    io:format("5555555555555555~p~n", [State]),
     Provider = providers:create([
+            {namespace, record_util},
             {name, ?PROVIDER},            % The 'user friendly' name of the task
             {module, ?MODULE},            % The module implementation of the task
             {bare, true},                 % The task can be run by the user, always true
