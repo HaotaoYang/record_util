@@ -1,7 +1,7 @@
 record_util
 =====
 
-A rebar plugin
+record_util plugin
 
 Build
 -----
@@ -14,13 +14,21 @@ Use
 Add the plugin to your rebar config:
 
     {plugins, [
-        {record_util, {git, "https://host/user/record_util.git", {tag, "0.1.0"}}}
+        {record_util, {git, "https://github.com/HaotaoYang/record_util.git", {branch, "master"}}}
     ]}.
 
-Then just call your plugin directly in an existing application:
+Add the config to your rebar config:
+    %% record_util_opts
+    {record_util_opts, [
+        {hrl_dirs, ["include"]},
+        {dest_dir, "src"},
+        {module_name, "record_helper"}
+    ]}.
 
-
-    $ rebar3 record_util
-    ===> Fetching record_util
-    ===> Compiling record_util
-    <Plugin Output>
+    %% provider_hooks
+    {provider_hooks, [
+        {pre, [
+            {compile, {record_util, pre_compile}},
+            {clean, {record_util, pre_clean}}
+        ]}
+    ]}.
