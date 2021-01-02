@@ -18,6 +18,7 @@ Add the plugin to your rebar config:
     ]}.
 
 Add the config to your rebar config:
+
     %% record_util_opts
     {record_util_opts, [
         {hrl_dirs, ["include"]},
