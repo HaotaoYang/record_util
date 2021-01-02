@@ -16,14 +16,14 @@
 -define(CHECK_VALUES(Values),
     case check_values(Values) of
         true -> skip;
-        _ -> exit({error, "Invalid args"})
+        _ -> exit({error, "Invalid record_util config args"})
     end
     ).
 
 -define(CHECK_VALUE(Value),
     case check_value(Value) of
         true -> skip;
-        _ -> exit({error, "Invalid args"})
+        _ -> exit({error, "Invalid record_util config args"})
     end
     ).
 
@@ -178,4 +178,5 @@ gen_file(DestDir, ModuleName, AllRecordInfos) ->
         || {RecordName, RecordFields} <- AllRecordInfos
     ] ++
     "fields_info(_Other) -> exit({error, \"Invalid Record Name\"}).\n",
+    file:make_dir(DestDir),
     ok = file:write_file(filename:join([DestDir, ModuleName]) ++ ".erl", list_to_binary(Data)).
