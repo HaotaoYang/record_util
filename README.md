@@ -14,7 +14,7 @@ Use
 Add the plugin to your rebar config:
 
     {plugins, [
-        {record_util, {git, "https://github.com/HaotaoYang/record_util.git", {branch, "master"}}}
+        {record_util, {git, "https://github.com/HaotaoYang/record_util.git", {tag, "0.1.0"}}}
     ]}.
 
 Add the config to your rebar config:
@@ -31,5 +31,9 @@ Add the config to your rebar config:
         {pre, [
             {compile, {record_util, pre_compile}},
             {clean, {record_util, pre_clean}}
+        ]},
+        {post, [
+            {compile, {record_util, post_compile}},
+            {clean, {record_util, post_clean}}
         ]}
     ]}.

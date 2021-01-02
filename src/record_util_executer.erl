@@ -72,7 +72,15 @@ pre_compile(AppInfo, _State) ->
     gen_file(DestDir, ModuleName, AllRecordInfos).
 
 -spec pre_clean(rebar_app_info:t(), rebar_state:t()) -> ok.
-pre_clean(_AppInfo, _State) -> ok.
+pre_clean(AppInfo, _State) ->
+    %% 获取项目rebar.config的配置
+    Opts = rebar_app_info:opts(AppInfo),
+    {ok, RecordUtilOpts} = dict:find(record_util_opts, Opts),
+    DestDir = proplists:get_value(dest_dir, RecordUtilOpts, ?DEFAULT_DEST_DIR),
+    ?CHECK_VALUE(DestDir),
+    ModuleName = proplists:get_value(module_name, RecordUtilOpts, ?DEFAULT_MODULE_NAME),
+    ?CHECK_VALUE(ModuleName),
+    del_file(DestDir, ModuleName).
     
 -spec post_compile(rebar_app_info:t(), rebar_state:t()) -> ok.
 post_compile(_AppInfo, _State) ->
@@ -180,3 +188,7 @@ gen_file(DestDir, ModuleName, AllRecordInfos) ->
     "fields_info(_Other) -> exit({error, \"Invalid Record Name\"}).\n",
     file:make_dir(DestDir),
     ok = file:write_file(filename:join([DestDir, ModuleName]) ++ ".erl", list_to_binary(Data)).
+
+del_file(DestDir, ModuleName) ->
+    FileName = filename:join([DestDir, ModuleName]) ++ ".erl",
+    file:delete(FileName).
