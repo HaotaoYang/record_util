@@ -181,7 +181,6 @@ filter_record_field([Info | RetInfos]) ->
 
 %% 生成文件内容
 gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
-    rabar_api:info("====HrlFiles:~p", [HrlFiles]),
     NewName = case is_atom(ModuleName) of
         true -> atom_to_list(ModuleName);
         _ -> ModuleName
