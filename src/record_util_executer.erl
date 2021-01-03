@@ -67,9 +67,10 @@ pre_compile(AppInfo, _State) ->
     ?CHECK_VALUE(DestDir),
     ModuleName = proplists:get_value(module_name, RecordUtilOpts, ?DEFAULT_MODULE_NAME),
     ?CHECK_VALUE(ModuleName),
-    RecordInfos = get_record_infos(HrlDirs),
+    HrlFiles = get_hrl_files(HrlDirs),
+    RecordInfos = get_record_infos(HrlFiles),
     AllRecordInfos = get_record_fields(RecordInfos),
-    gen_file(DestDir, ModuleName, AllRecordInfos).
+    gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos).
 
 -spec pre_clean(rebar_app_info:t(), rebar_state:t()) -> ok.
 pre_clean(AppInfo, _State) ->
@@ -102,18 +103,27 @@ check_values(Values) ->
 check_value(Value) when is_atom(Value) orelse is_list(Value) -> true;
 check_value(_) -> false.
 
-%% 获取指定目录内所有文件的record信息
-get_record_infos(HrlDirs) ->
-    RecordInfos = lists:flatten([
-        begin
-            case file:list_dir(Dir) of
-                {ok, Files} ->
-                    [get_file_record_infos(filename:join([Dir, File])) || File <- Files, filelib:is_file(filename:join([Dir, File]))];
-                _ ->
-                    []
-            end
+%% 获取制定目录内的所有头文件
+get_hrl_files(HrlDirs) ->
+    lists:flatten([
+        case file:list_dir(Dir) of
+            {ok, Files} ->
+                [filename:join([Dir, File]) || File <- Files, is_hrl_file(filename:join([Dir, File]))];
+            _ -> []
         end || Dir <- HrlDirs
-    ]),
+    ]).
+
+%% 判断是否为头文件
+is_hrl_file(FileName) when is_atom(FileName) ->
+    NewFileName = atom_to_list(FileName),
+    is_hrl_file(NewFileName);
+is_hrl_file(FileName) when is_list(FileName) ->
+    lists:suffix("hrl", FileName);
+is_hrl_file(_) -> false.
+
+%% 获取指定头文件的record信息
+get_record_infos(HrlFiles) ->
+    RecordInfos = lists:flatten([get_file_record_infos(HrlFile) || HrlFile <- HrlFiles]),
     lists:foldl(
         fun(RecordInfo, TempInfos) ->
             {RecordName, _} = RecordInfo,
@@ -166,7 +176,7 @@ filter_record_field([Info | RetInfos]) ->
     end.
 
 %% 生成文件内容
-gen_file(DestDir, ModuleName, AllRecordInfos) ->
+gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
     NewName = case is_atom(ModuleName) of
         true -> atom_to_list(ModuleName);
         _ -> ModuleName
@@ -178,14 +188,25 @@ gen_file(DestDir, ModuleName, AllRecordInfos) ->
     "\n" ++
     "-module(" ++ NewName ++ ").\n" ++
     "\n" ++
-    "-export([fields_info/1]).\n" ++
+    ["-include(\"" ++ HrlFile ++ "\").\n" || HrlFile <- HrlFiles] ++
+    "\n" ++
+    "-export([fields_info/1, is_record/1]).\n" ++
     "\n" ++
     "%% get all fields name of records\n" ++
     [
-        "fields_info(" ++ atom_to_list(RecordName) ++ ") ->" ++ io_lib:format("~p", [RecordFields]) ++ ";\n"
+        "fields_info(" ++ atom_to_list(RecordName) ++ ") -> " ++ io_lib:format("~p", [RecordFields]) ++ ";\n"
         || {RecordName, RecordFields} <- AllRecordInfos
     ] ++
-    "fields_info(_Other) -> exit({error, \"Invalid Record Name\"}).\n",
+    "fields_info(_Other) -> exit({error, \"Invalid Record Name\"}).\n" ++
+    "\n" ++
+    ["is_record(" ++ atom_to_list(RecordName) ++ ") -> true;\n" || {RecordName, _} <- AllRecordInfos] ++
+    "is_record(_Other) -> false.\n" ++
+    "\n" ++
+    [
+        "get_record(" ++ atom_to_list(RecordName) ++ ") -> #" ++ atom_to_list(RecordName) ++ "{};\n"
+        || {RecordName, _} <- AllRecordInfos
+    ] ++
+    "get_record(_Other) -> undefined.\n",
     file:make_dir(DestDir),
     ok = file:write_file(filename:join([DestDir, ModuleName]) ++ ".erl", list_to_binary(Data)).
 
