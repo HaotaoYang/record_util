@@ -105,13 +105,17 @@ check_value(_) -> false.
 
 %% 获取制定目录内的所有头文件
 get_hrl_files(HrlDirs) ->
-    lists:flatten([
-        case file:list_dir(Dir) of
-            {ok, Files} ->
-                [filename:join([Dir, File]) || File <- Files, is_hrl_file(filename:join([Dir, File]))];
-            _ -> []
-        end || Dir <- HrlDirs
-    ]).
+    lists:foldl(
+        fun(Dir, TempFiles) ->
+            case file:list_dir(Dir) of
+                {ok, Files} ->
+                    TempFiles ++ [filename:join([Dir, File]) || File <- Files, is_hrl_file(filename:join([Dir, File]))];
+                _ -> TempFiles
+            end
+        end,
+        [],
+        HrlDirs
+    ).
 
 %% 判断是否为头文件
 is_hrl_file(FileName) when is_atom(FileName) ->
@@ -177,6 +181,7 @@ filter_record_field([Info | RetInfos]) ->
 
 %% 生成文件内容
 gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
+    rabar_api:info("====HrlFiles:~p", [HrlFiles]),
     NewName = case is_atom(ModuleName) of
         true -> atom_to_list(ModuleName);
         _ -> ModuleName
@@ -190,7 +195,7 @@ gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
     "\n" ++
     ["-include(\"" ++ HrlFile ++ "\").\n" || HrlFile <- HrlFiles] ++
     "\n" ++
-    "-export([fields_info/1, is_record/1]).\n" ++
+    "-export([fields_info/1, is_record/1, get_record/1]).\n" ++
     "\n" ++
     "%% get all fields name of records\n" ++
     [
