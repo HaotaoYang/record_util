@@ -14,7 +14,7 @@ Use
 Add the plugin to your rebar config:
 
     {plugins, [
-        {record_util, {git, "https://github.com/HaotaoYang/record_util.git", {tag, "0.1.0"}}}
+        {record_util, {git, "https://github.com/HaotaoYang/record_util.git", {branch, "master"}}}
     ]}.
 
 Add the config to your rebar config:
