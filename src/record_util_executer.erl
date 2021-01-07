@@ -105,7 +105,7 @@ check_value(_) -> false.
 
 %% 获取制定目录内的所有头文件
 get_hrl_files(HrlDirs) ->
-    lists:foldl(
+    HrlFiles = lists:foldl(
         fun(Dir, TempFiles) ->
             case file:list_dir(Dir) of
                 {ok, Files} ->
@@ -115,7 +115,8 @@ get_hrl_files(HrlDirs) ->
         end,
         [],
         HrlDirs
-    ).
+    ),
+    lists:sort(HrlFiles).
 
 %% 判断是否为头文件
 is_hrl_file(FileName) when is_atom(FileName) ->
