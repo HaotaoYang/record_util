@@ -123,7 +123,9 @@ is_hrl_file(FileName) when is_atom(FileName) ->
     NewFileName = atom_to_list(FileName),
     is_hrl_file(NewFileName);
 is_hrl_file(FileName) when is_list(FileName) ->
-    lists:suffix("hrl", FileName);
+    lists:suffix(".hrl", FileName);
+% is_hrl_file(FileName) when is_list(FileName) ->
+%     filename:extension(FileName) == ".hrl";
 is_hrl_file(_) -> false.
 
 %% 获取指定头文件的record信息
