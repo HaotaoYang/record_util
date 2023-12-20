@@ -197,7 +197,7 @@ gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
     "\n" ++
     ["-include(\"" ++ HrlFile ++ "\").\n" || HrlFile <- HrlFiles] ++
     "\n" ++
-    "-export([fields_info/1, is_record/1, get_record/1]).\n" ++
+    "-export([fields_info/1, is_record/1, get_record/1, map_2_record/2, record_2_map/1]).\n" ++
     "\n" ++
     "%% get all fields name of records\n" ++
     [
@@ -213,7 +213,30 @@ gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
         "get_record(" ++ atom_to_list(RecordName) ++ ") -> #" ++ atom_to_list(RecordName) ++ "{};\n"
         || {RecordName, _} <- AllRecordInfos
     ] ++
-    "get_record(_Other) -> undefined.\n",
+    "get_record(_Other) -> undefined.\n" ++
+    "\n" ++
+    "map_2_record(Map, RecordName) when is_map(Map) andalso is_record(RecordName) ->\n" ++
+    "    RecordFields = fields_info(RecordName),\n" ++
+    "    ValueList = [maps:get(Field, Map) || Field <- RecordFields],\n" ++
+    "    list_to_tuple([RecordName | ValueList]);\n" ++
+    "map_2_record(_, _) -> undefined.\n" ++
+    "\n" ++
+    [
+        begin
+            "record_2_map(Record) when is_record(Record, " ++ atom_to_list(RecordName) ++ ") ->\n" ++
+            "    #{\n" ++
+            [
+                 case Field =/= lists:last(RecordFields) of
+                     true ->
+                         "        " ++ atom_to_list(Field) ++ " => Record#" ++ atom_to_list(RecordName) ++ "." ++ atom_to_list(Field) ++ ",\n";
+                     _ ->
+                         "        " ++ atom_to_list(Field) ++ " => Record#" ++ atom_to_list(RecordName) ++ "." ++ atom_to_list(Field) ++ "\n"
+                 end || Field <- RecordFields
+            ] ++
+            "    };\n"
+        end || {RecordName, RecordFields} <- AllRecordInfos
+    ] ++
+    "record_2_map(_) -> undefined.",
     file:make_dir(DestDir),
     ok = file:write_file(filename:join([DestDir, ModuleName]) ++ ".erl", list_to_binary(Data)).
 
