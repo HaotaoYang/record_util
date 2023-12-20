@@ -215,7 +215,7 @@ gen_file(DestDir, ModuleName, HrlFiles, AllRecordInfos) ->
     ] ++
     "get_record(_Other) -> undefined.\n" ++
     "\n" ++
-    "map_2_record(Map, RecordName) when is_map(Map) andalso is_record(RecordName) ->\n" ++
+    "map_2_record(Map, RecordName) when is_map(Map) ->\n" ++
     "    RecordFields = fields_info(RecordName),\n" ++
     "    ValueList = [maps:get(Field, Map) || Field <- RecordFields],\n" ++
     "    list_to_tuple([RecordName | ValueList]);\n" ++
